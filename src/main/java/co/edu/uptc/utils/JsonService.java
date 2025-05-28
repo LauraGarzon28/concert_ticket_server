@@ -132,7 +132,7 @@ public class JsonService {
                 JsonObject seatObj = el.getAsJsonObject();
                 seats.add(new Seat(seatObj.get("row").getAsInt(), seatObj.get("column").getAsInt()));
             }
-            return new Reservation(clientId, concert, zone, seats, quantity);
+            return new Reservation(clientId, concert, zone, seats);
         } else {
             return new Reservation(clientId, concert, zone, quantity);
         }

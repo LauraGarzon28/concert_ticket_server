@@ -20,13 +20,14 @@ public class SeatsZone extends Zone {
         seats = new Seat[rows][columns];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                seats[i][j] = new Seat(i, j); 
+                seats[i][j] = new Seat(i, j, false); 
+
             }
         }
     }
 
     public Seat getSeat(int row, int col) {
-        if (row >= 1 && row <= rows && col >= 1 && col <= columns) {
+        if (row >= 0 && row <= rows && col >= 0 && col <= columns) {
             return seats[row][col];
         }
         return null;

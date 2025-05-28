@@ -13,13 +13,20 @@ public class ReservationDTO implements Serializable {
     private List<SeatDTO> seats;
     private int quantityReserved;
 
-    public ReservationDTO(int clientId, ConcertDTO concert, ZoneDTO reservedZone, List<SeatDTO> seats,
-            int quantityReserved) {
+    public ReservationDTO(int clientId, ConcertDTO concert, ZoneDTO reservedZone, List<SeatDTO> seats) {
         this.clientId = clientId;
+        this.concert = concert;
         this.reservedZone = reservedZone;
         this.seats = seats;
+    }
+
+    public ReservationDTO(int clientId, ConcertDTO concert, ZoneDTO reservedZone,
+            int quantityReserved) {
+        this.clientId = clientId;
+        this.concert = concert;
+        this.reservedZone = reservedZone;
         this.quantityReserved = quantityReserved;
-    }    
+    }
 
     public int getClientId() {
         return clientId;

@@ -6,7 +6,9 @@ import java.util.List;
 
 import co.edu.uptc.dtos.ConcertDTO;
 import co.edu.uptc.dtos.ReservationDTO;
-import co.edu.uptc.dtos.ZoneDTO;public class Concert {
+import co.edu.uptc.dtos.ZoneDTO;
+
+public class Concert {
 
     private String name;
     private List<String> artists;
@@ -27,9 +29,10 @@ import co.edu.uptc.dtos.ZoneDTO;public class Concert {
         this.reservations = (reservations != null) ? reservations : new ArrayList<>();
     }
 
-    public Concert() {}
+    public Concert() {
+    }
 
-     public Zone getZoneByName(String zoneName) {
+    public Zone getZoneByName(String zoneName) {
         for (Zone zone : zones) {
             if (zone.getName().equalsIgnoreCase(zoneName)) {
                 return zone;
@@ -45,7 +48,7 @@ import co.edu.uptc.dtos.ZoneDTO;public class Concert {
     public boolean removeZone(String zoneName) {
         return this.zones.removeIf(zone -> zone.getName().equalsIgnoreCase(zoneName));
     }
-    
+
     public void addReservation(Reservation reservation) {
         this.reservations.add(reservation);
     }

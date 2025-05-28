@@ -14,13 +14,11 @@ public class Reservation {
     private List<Seat> seats;
     private int quantityReserved;
 
-    public Reservation(int clientId, Concert reservedConcert, Zone reservedZone, List<Seat> seats,
-            int quantityReserved) {
+    public Reservation(int clientId, Concert reservedConcert, Zone reservedZone, List<Seat> seats) {
         this.clientId = clientId;
         this.reservedConcert = reservedConcert;
         this.reservedZone = reservedZone;
         this.seats = seats;
-        this.quantityReserved = quantityReserved;
     }
 
     public Reservation(int clientId, Concert reservedConcert, Zone reservedZone, int quantityReserved) {
@@ -31,40 +29,52 @@ public class Reservation {
     }
 
     public ReservationDTO toDTO() {
-        List<SeatDTO> seatDTOs = null;
-        if (seats != null) {
-            seatDTOs = new ArrayList<>();
-            for (Seat seat : seats) {
-                seatDTOs.add(seat.toDTO());
+        if (reservedZone instanceof SeatsZone) {
+            List<SeatDTO> seatDTOs = null;
+            if (seats != null) {
+                seatDTOs = new ArrayList<>();
+                for (Seat seat : seats) {
+                    seatDTOs.add(seat.toDTO());
+                }
             }
+            return new ReservationDTO(
+                    clientId,
+                    reservedConcert != null ? reservedConcert.toDTO() : null,
+                    reservedZone != null ? reservedZone.toDTO() : null,
+                    seatDTOs);
+        } else {
+            return new ReservationDTO(
+                    clientId,
+                    reservedConcert != null ? reservedConcert.toDTO() : null,
+                    reservedZone != null ? reservedZone.toDTO() : null,
+                    quantityReserved);
         }
-
-        return new ReservationDTO(
-                clientId,
-                reservedConcert != null ? reservedConcert.toDTO() : null,
-                reservedZone != null ? reservedZone.toDTO() : null,
-                seatDTOs,
-                quantityReserved);
     }
 
     public static Reservation fromDTO(ReservationDTO dto) {
-        List<Seat> seatList = null;
-        if (dto.getSeats() != null) {
-            seatList = new ArrayList<>();
-            for (SeatDTO seatDTO : dto.getSeats()) {
-                seatList.add(Seat.fromDTO(seatDTO));
-            }
-        }
-
         Concert concert = dto.getConcert() != null ? Concert.fromDTO(dto.getConcert()) : null;
         Zone zone = dto.getReservedZone() != null ? Zone.fromDTO(dto.getReservedZone()) : null;
 
-        return new Reservation(
-                dto.getClientId(),
-                concert,
-                zone,
-                seatList,
-                dto.getQuantityReserved());
+        if (zone instanceof SeatsZone) {
+            List<Seat> seatList = null;
+            if (dto.getSeats() != null) {
+                seatList = new ArrayList<>();
+                for (SeatDTO seatDTO : dto.getSeats()) {
+                    seatList.add(Seat.fromDTO(seatDTO));
+                }
+            }
+            return new Reservation(
+                    dto.getClientId(),
+                    concert,
+                    zone,
+                    seatList);
+        } else {
+            return new Reservation(
+                    dto.getClientId(),
+                    concert,
+                    zone,
+                    dto.getQuantityReserved());
+        }
     }
 
     public Concert getReservedConcert() {
