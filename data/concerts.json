@@ -1,0 +1,119 @@
+{
+  "concerts": [
+    {
+      "name": "Rock Fest",
+      "place": "Stadium ABC",
+      "description": "A night of amazing rock bands.",
+      "dateHour": "2025-07-15T20:00:00",
+      "artists": ["Linkin Park", "Foo Fighters"],
+      "zones": [
+        {
+          "type": "GeneralZone",
+          "name": "General Admission",
+          "price": 100.0,
+          "description": "Standing area near the stage.",
+          "hasSeats": false,
+          "maxCapacity": 500,
+          "quantityReserved": 50
+        },
+        {
+          "type": "SeatsZone",
+          "name": "VIP Seats",
+          "price": 250.0,
+          "description": "Comfortable seats with best view.",
+          "hasSeats": true,
+          "numberRows": 2,
+          "numberColumns": 3,
+          "seats": [
+            [true, false, false],
+            [false, true, false]
+          ]
+        }
+      ],
+      "reservations": [
+        {
+          "id": 1,
+          "clientId": 1001,
+          "zoneName": "VIP Seats",
+          "quantityReserved": 2,
+          "totalPrice": 500.0,
+          "seatPositions": [
+            {"row": 0, "column": 0},
+            {"row": 1, "column": 1}
+          ]
+        },
+        {
+          "id": 2,
+          "clientId": 1002,
+          "zoneName": "General Admission",
+          "quantityReserved": 3,
+          "totalPrice": 300.0
+        }
+      ]
+    },
+    {
+      "name": "Jazz Night",
+      "place": "Downtown Theater",
+      "description": "Smooth jazz with local artists.",
+      "dateHour": "2025-08-10T19:30:00",
+      "artists": ["Norah Jones", "Snarky Puppy"],
+      "zones": [
+        {
+          "type": "GeneralZone",
+          "name": "Main Floor",
+          "price": 80.0,
+          "description": "Open space for dancing and listening.",
+          "hasSeats": false,
+          "maxCapacity": 300,
+          "quantityReserved": 100
+        }
+      ],
+      "reservations": [
+        {
+          "id": 3,
+          "clientId": 1010,
+          "zoneName": "Main Floor",
+          "quantityReserved": 5,
+          "totalPrice": 400.0
+        }
+      ]
+    },
+    {
+      "name": "Symphonic Dreams",
+      "place": "National Concert Hall",
+      "description": "An orchestral evening with Beethoven and Mozart.",
+      "dateHour": "2025-09-01T18:00:00",
+      "artists": ["National Symphony Orchestra"],
+      "zones": [
+        {
+          "type": "SeatsZone",
+          "name": "Orchestra Section",
+          "price": 150.0,
+          "description": "Seats with direct view to the orchestra.",
+          "hasSeats": true,
+          "numberRows": 3,
+          "numberColumns": 4,
+          "seats": [
+            [false, false, false, false],
+            [true, true, false, false],
+            [false, false, true, false]
+          ]
+        }
+      ],
+      "reservations": [
+        {
+          "id": 4,
+          "clientId": 1020,
+          "zoneName": "Orchestra Section",
+          "quantityReserved": 3,
+          "totalPrice": 450.0,
+          "seatPositions": [
+            {"row": 1, "column": 0},
+            {"row": 1, "column": 1},
+            {"row": 2, "column": 2}
+          ]
+        }
+      ]
+    }
+  ]
+}
