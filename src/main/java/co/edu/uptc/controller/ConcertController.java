@@ -29,7 +29,7 @@ public class ConcertController {
         GeneralZone generalZone = new GeneralZone("General", 50.0, "Zona general sin asientos", false, 100);
         SeatsZone seatsZone = new SeatsZone("VIP", 150.0, "Zona con asientos asignados", true, 5, 5);
 
-        Concert concert = new Concert("Rock Fest 2025", new ArrayList<String>(), LocalDateTime.now(), "Cuba", "Una descripción", null);
+        Concert concert = new Concert("Legend 1997", new ArrayList<String>(), LocalDateTime.now(), "Cuba", "Una descripción", null);
 
         concert.addZone(generalZone);
         concert.addZone(seatsZone);
@@ -72,8 +72,8 @@ public class ConcertController {
         List<Reservation> allRemaining = concertManager.getReservationsByClientId(1);
         System.out.println("Reservaciones restantes para cliente 1: " + allRemaining.size());
 
-        concertManager.removeConcert("Rock Fest 2025");
-        System.out.println("Concierto eliminado: " + (concertManager.searchConcert("Rock Fest 2025") == null));
+        concertManager.removeConcert("Legend 1997");
+        System.out.println("Concierto eliminado: " + (concertManager.searchConcert("Legend 1997") == null));
 
         try {
             serverSocket = new ServerSocket(port);

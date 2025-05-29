@@ -14,6 +14,7 @@ public class ConcertManager {
 
     private BinaryTree<Concert> concerts;
     private JsonService jsonService;
+    private final String filePath = "./data/concerts.json";
 
     public ConcertManager() {
         this.concerts = new BinaryTree<>((concert1, concert2) -> concert1.getName().compareTo(concert2.getName()));
@@ -22,7 +23,7 @@ public class ConcertManager {
     }
 
     private void loadConcerts() {
-        List<Concert> concertsFromFile = jsonService.readJsonConcerts("./data/concerts.json");
+        List<Concert> concertsFromFile = jsonService.readJsonConcerts(filePath);
         if (concertsFromFile != null) {
             for (Concert concert : concertsFromFile) {
                 concerts.add(concert);
@@ -34,7 +35,9 @@ public class ConcertManager {
         if (concert == null || concert.getName() == null) {
             return false;
         }
-        return concerts.add(concert);
+        concerts.add(concert);
+        jsonService.appendConcertToFile(filePath, concert);
+        return true;
     }
 
     public Concert searchConcert(String name) {
@@ -60,18 +63,26 @@ public class ConcertManager {
 
         if (concerts.exist(newConcert) != null) {
             concerts.delete(newConcert);
-            return concerts.add(concert);
+            concerts.add(concert);
+
+            jsonService.writeConcertsToFile(filePath, getAllConcerts());
+            return true;
         }
         return false;
     }
 
-    public synchronized void removeConcert(String name) {
+    public synchronized boolean removeConcert(String name) {
         if (name == null || name.trim().isEmpty()) {
-            return;
+            return false;
         }
         Concert concert = new Concert();
         concert.setName(name);
-        concerts.delete(concert);
+        if (concerts.exist(concert) != null) {
+            concerts.delete(concert);
+            jsonService.writeConcertsToFile(filePath, getAllConcerts());
+            return true;
+        } else
+            return false;
     }
 
     public synchronized boolean addGeneralReservation(Reservation reservation) {
@@ -92,7 +103,10 @@ public class ConcertManager {
         if (generalZone.getAvailableCapacity() >= quantity) {
             boolean reserved = generalZone.reserve(quantity);
             if (reserved) {
-                return concert.getReservations().add(reservation);
+                concert.getReservations().add(reservation);
+
+                jsonService.writeConcertsToFile(filePath, getAllConcerts());
+                return true;
             }
         }
 
@@ -123,7 +137,9 @@ public class ConcertManager {
             seatsZone.reserveSeat(seat.getRow(), seat.getColumn());
         }
 
-        return concert.getReservations().add(reservation);
+        concert.getReservations().add(reservation);
+        jsonService.writeConcertsToFile(filePath, getAllConcerts());
+        return true;
     }
 
     public List<Reservation> getReservationsByClientId(int clientId) {
@@ -158,7 +174,9 @@ public class ConcertManager {
             }
         }
 
-        return concert.getReservations().remove(reservation);
+        concert.getReservations().remove(reservation);
+        jsonService.writeConcertsToFile(filePath, getAllConcerts());
+        return true;
     }
 
     public List<ConcertDTO> toDTO(List<Concert> concerts) {

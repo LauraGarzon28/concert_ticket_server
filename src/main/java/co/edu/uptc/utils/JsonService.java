@@ -1,6 +1,8 @@
 package co.edu.uptc.utils;
 
+import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -137,4 +139,120 @@ public class JsonService {
             return new Reservation(clientId, concert, zone, quantity);
         }
     }
+
+    private JsonObject concertToJson(Concert c) {
+        JsonObject obj = new JsonObject();
+        obj.addProperty("name", c.getName());
+        obj.addProperty("place", c.getPlace());
+        obj.addProperty("description", c.getDescription());
+        obj.addProperty("dateHour", c.getDateHour().toString());
+
+        JsonArray artists = new JsonArray();
+        for (String artist : c.getArtists()) {
+            artists.add(artist);
+        }
+        obj.add("artists", artists);
+
+        JsonArray zonesArray = new JsonArray();
+        for (Zone z : c.getZones()) {
+            if (z instanceof GeneralZone gz) {
+                JsonObject gzObj = new JsonObject();
+                gzObj.addProperty("type", "GeneralZone");
+                gzObj.addProperty("name", gz.getName());
+                gzObj.addProperty("price", gz.getPrice());
+                gzObj.addProperty("description", gz.getDescription());
+                gzObj.addProperty("hasSeats", gz.hasSeats());
+                gzObj.addProperty("maxCapacity", gz.getMaxCapacity());
+                gzObj.addProperty("quantityReserved", gz.getQuantityReserved());
+                zonesArray.add(gzObj);
+            } else if (z instanceof SeatsZone sz) {
+                JsonObject szObj = new JsonObject();
+                szObj.addProperty("type", "SeatsZone");
+                szObj.addProperty("name", sz.getName());
+                szObj.addProperty("price", sz.getPrice());
+                szObj.addProperty("description", sz.getDescription());
+                szObj.addProperty("hasSeats", sz.hasSeats());
+                szObj.addProperty("numberRows", sz.getRows());
+                szObj.addProperty("numberColumns", sz.getColumns());
+
+                JsonArray seatMatrix = new JsonArray();
+                for (int i = 0; i < sz.getRows(); i++) {
+                    JsonArray row = new JsonArray();
+                    for (int j = 0; j < sz.getColumns(); j++) {
+                        row.add(sz.getSeat(i, j).isReserved());
+                    }
+                    seatMatrix.add(row);
+                }
+                szObj.add("seats", seatMatrix);
+                zonesArray.add(szObj);
+            }
+        }
+        obj.add("zones", zonesArray);
+
+        JsonArray reservationsArray = new JsonArray();
+        for (Reservation r : c.getReservations()) {
+            JsonObject rObj = new JsonObject();
+            rObj.addProperty("clientId", r.getClientId());
+            rObj.addProperty("zoneName", r.getReservedZone().getName());
+            rObj.addProperty("quantityReserved", r.getQuantityReserved());
+
+            if (r.getSeats() != null && !r.getSeats().isEmpty()) {
+                JsonArray seatsArr = new JsonArray();
+                for (Seat s : r.getSeats()) {
+                    JsonObject sObj = new JsonObject();
+                    sObj.addProperty("row", s.getRow());
+                    sObj.addProperty("column", s.getColumn());
+                    seatsArr.add(sObj);
+                }
+                rObj.add("seatPositions", seatsArr);
+            }
+            reservationsArray.add(rObj);
+        }
+        obj.add("reservations", reservationsArray);
+
+        return obj;
+    }
+
+    public void appendConcertToFile(String filePath, Concert concert) {
+        try {
+            JsonObject root;
+            File file = new File(filePath);
+            if (file.exists()) {
+                try (FileReader reader = new FileReader(file)) {
+                    root = JsonParser.parseReader(reader).getAsJsonObject();
+                }
+            } else {
+                root = new JsonObject();
+                root.add("concerts", new JsonArray());
+            }
+
+            JsonArray concertsArray = root.getAsJsonArray("concerts");
+            concertsArray.add(concertToJson(concert));
+
+            try (FileWriter writer = new FileWriter(filePath)) {
+                writer.write(root.toString());
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void writeConcertsToFile(String filePath, List<Concert> concerts) {
+        JsonObject root = new JsonObject();
+        JsonArray concertsArray = new JsonArray();
+
+        for (Concert concert : concerts) {
+            concertsArray.add(concertToJson(concert));
+        }
+
+        root.add("concerts", concertsArray);
+
+        try (FileWriter writer = new FileWriter(filePath)) {
+            writer.write(root.toString());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
