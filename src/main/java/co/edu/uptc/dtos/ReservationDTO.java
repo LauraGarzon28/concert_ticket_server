@@ -8,23 +8,22 @@ public class ReservationDTO implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private int clientId;
-    private ConcertDTO concert;
-    private ZoneDTO reservedZone;
+    private String concertName;
+    private String zoneName;
     private List<SeatDTO> seats;
     private int quantityReserved;
 
-    public ReservationDTO(int clientId, ConcertDTO concert, ZoneDTO reservedZone, List<SeatDTO> seats) {
+    public ReservationDTO(int clientId, String concertName, String zoneName, List<SeatDTO> seats) {
         this.clientId = clientId;
-        this.concert = concert;
-        this.reservedZone = reservedZone;
+        this.concertName = concertName;
+        this.zoneName = zoneName;
         this.seats = seats;
     }
 
-    public ReservationDTO(int clientId, ConcertDTO concert, ZoneDTO reservedZone,
-            int quantityReserved) {
+    public ReservationDTO(int clientId, String concertName, String zoneName, int quantityReserved) {
         this.clientId = clientId;
-        this.concert = concert;
-        this.reservedZone = reservedZone;
+        this.concertName = concertName;
+        this.zoneName = zoneName;
         this.quantityReserved = quantityReserved;
     }
 
@@ -52,20 +51,20 @@ public class ReservationDTO implements Serializable {
         this.quantityReserved = quantityReserved;
     }
 
-    public ConcertDTO getConcert() {
-        return concert;
+    public String getConcertName() {
+        return concertName;
     }
 
-    public void setConcert(ConcertDTO concert) {
-        this.concert = concert;
+    public void setConcertName(String concertName) {
+        this.concertName = concertName;
     }
 
-    public ZoneDTO getReservedZone() {
-        return reservedZone;
+    public String getZoneName() {
+        return zoneName;
     }
 
-    public void setReservedZone(ZoneDTO reservedZone) {
-        this.reservedZone = reservedZone;
+    public void setZoneName(String zoneName) {
+        this.zoneName = zoneName;
     }
 
 }

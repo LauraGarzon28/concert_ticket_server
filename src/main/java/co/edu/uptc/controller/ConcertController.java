@@ -16,7 +16,6 @@ import co.edu.uptc.model.GeneralZone;
 import co.edu.uptc.model.Reservation;
 import co.edu.uptc.model.Seat;
 import co.edu.uptc.model.SeatsZone;
-import co.edu.uptc.model.Zone;
 
 public class ConcertController {
 
@@ -42,8 +41,8 @@ public class ConcertController {
 
         Reservation generalReservation = new Reservation(
                 1, // clientId
-                concert, // concierto
-                (Zone) generalZone, // zona
+                concert.getName(), // concierto
+                generalZone.getName(), // zona
                 5);
         System.out.println("Reservar en zona general: " + concertManager.addGeneralReservation(generalReservation));
 
@@ -53,8 +52,8 @@ public class ConcertController {
 
         Reservation seatReservation = new Reservation(
                 1, // clientId
-                concert,
-                seatsZone,
+                concert.getName(),
+                seatsZone.getName(),
                 seats);
 
         System.out.println("Reservar asientos: " + concertManager.addSeatReservation(seatReservation));

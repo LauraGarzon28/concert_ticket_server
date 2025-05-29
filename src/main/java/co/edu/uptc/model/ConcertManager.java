@@ -86,25 +86,25 @@ public class ConcertManager {
     }
 
     public synchronized boolean addGeneralReservation(Reservation reservation) {
-        if (reservation == null || reservation.getReservedConcert() == null)
+        if (reservation == null)
             return false;
 
-        Concert concert = concerts.exist(reservation.getReservedConcert());
+        Concert concert = new Concert();
+        concert.setName(reservation.getConcertName());
+        concert = concerts.search(concert);
         if (concert == null)
             return false;
 
-        Zone zone = reservation.getReservedZone();
-        if (!(zone instanceof GeneralZone))
+        Zone zone = findZoneByName(concert, reservation.getZoneName());
+        if (!(zone instanceof GeneralZone generalZone))
             return false;
 
-        GeneralZone generalZone = (GeneralZone) zone;
         int quantity = reservation.getQuantityReserved();
 
         if (generalZone.getAvailableCapacity() >= quantity) {
             boolean reserved = generalZone.reserve(quantity);
             if (reserved) {
                 concert.getReservations().add(reservation);
-
                 jsonService.writeConcertsToFile(filePath, getAllConcerts());
                 return true;
             }
@@ -114,18 +114,18 @@ public class ConcertManager {
     }
 
     public synchronized boolean addSeatReservation(Reservation reservation) {
-        if (reservation == null || reservation.getReservedConcert() == null)
+        if (reservation == null)
             return false;
 
-        Concert concert = concerts.exist(reservation.getReservedConcert());
+        Concert concert = new Concert();
+        concert.setName(reservation.getConcertName());
+        concert = concerts.search(concert);
         if (concert == null)
             return false;
 
-        Zone zone = reservation.getReservedZone();
-        if (!(zone instanceof SeatsZone))
+        Zone zone = findZoneByName(concert, reservation.getZoneName());
+        if (!(zone instanceof SeatsZone seatsZone))
             return false;
-
-        SeatsZone seatsZone = (SeatsZone) zone;
 
         for (Seat seat : reservation.getSeats()) {
             if (seatsZone.getSeat(seat.getRow(), seat.getColumn()).isReserved()) {
@@ -157,14 +157,16 @@ public class ConcertManager {
     }
 
     public boolean removeReservation(Reservation reservation) {
-        if (reservation == null || reservation.getReservedConcert() == null)
+        if (reservation == null)
             return false;
 
-        Concert concert = concerts.exist(reservation.getReservedConcert());
+        Concert concert = new Concert();
+        concert.setName(reservation.getConcertName());
+        concert = concerts.search(concert);
         if (concert == null)
             return false;
 
-        Zone zone = reservation.getReservedZone();
+        Zone zone = findZoneByName(concert, reservation.getZoneName());
 
         if (zone instanceof GeneralZone generalZone) {
             generalZone.unreserve(reservation.getQuantityReserved());
@@ -218,30 +220,34 @@ public class ConcertManager {
     }
 
     private ReservationDTO convertReservationToDTO(Reservation reservation) {
-        ZoneDTO zoneDTO = reservation.getReservedZone() != null ? reservation.getReservedZone().toDTO() : null;
-        ConcertDTO concertDTO = reservation.getReservedConcert() != null ? reservation.getReservedConcert().toDTO()
-                : null;
+        String concertName = reservation.getConcertName();
+        String zoneName = reservation.getZoneName();
 
-        if (reservation.getReservedZone() instanceof SeatsZone) {
+        if (reservation.getSeats() != null && !reservation.getSeats().isEmpty()) {
             List<SeatDTO> seatDTOs = new ArrayList<>();
-            if (reservation.getSeats() != null) {
-                for (Seat seat : reservation.getSeats()) {
-                    seatDTOs.add(seat.toDTO());
-                }
+            for (Seat seat : reservation.getSeats()) {
+                seatDTOs.add(seat.toDTO());
             }
 
             return new ReservationDTO(
                     reservation.getClientId(),
-                    concertDTO,
-                    zoneDTO,
+                    concertName,
+                    zoneName,
                     seatDTOs);
         } else {
             return new ReservationDTO(
                     reservation.getClientId(),
-                    concertDTO,
-                    zoneDTO,
+                    concertName,
+                    zoneName,
                     reservation.getQuantityReserved());
         }
+    }
+
+    private Zone findZoneByName(Concert concert, String zoneName) {
+        return concert.getZones().stream()
+                .filter(z -> z.getName().equals(zoneName))
+                .findFirst()
+                .orElse(null);
     }
 
 }
