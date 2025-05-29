@@ -50,11 +50,15 @@ public class JsonService {
 
         JsonArray reservationsArray = obj.getAsJsonArray("reservations");
         for (JsonElement res : reservationsArray) {
-            Reservation reservation = parseReservation(res.getAsJsonObject(), zones, concert);
+            Reservation reservation = parseReservation(res.getAsJsonObject(), zones, name); // Usamos name
 
-            if (reservation.getReservedZone() instanceof SeatsZone seatsZone && reservation.getSeats() != null) {
-                for (Seat seat : reservation.getSeats()) {
-                    seatsZone.reserveSeat(seat.getRow(), seat.getColumn());
+            if (reservation.getZoneName() != null) {
+                Zone zone = zones.stream().filter(z -> z.getName().equals(reservation.getZoneName())).findFirst()
+                        .orElse(null);
+                if (zone instanceof SeatsZone seatsZone && reservation.getSeats() != null) {
+                    for (Seat seat : reservation.getSeats()) {
+                        seatsZone.reserveSeat(seat.getRow(), seat.getColumn());
+                    }
                 }
             }
 
@@ -120,23 +124,21 @@ public class JsonService {
         return zone;
     }
 
-    private Reservation parseReservation(JsonObject obj, List<Zone> zones, Concert concert) {
+    private Reservation parseReservation(JsonObject obj, List<Zone> zones, String concertName) {
         int clientId = obj.get("clientId").getAsInt();
         String zoneName = obj.get("zoneName").getAsString();
         int quantity = obj.get("quantityReserved").getAsInt();
 
-        Zone zone = zones.stream().filter(z -> z.getName().equals(zoneName)).findFirst().orElse(null);
-
-        if (zone instanceof SeatsZone && obj.has("seatPositions")) {
+        if (obj.has("seatPositions")) {
             List<Seat> seats = new ArrayList<>();
             JsonArray positions = obj.getAsJsonArray("seatPositions");
             for (JsonElement el : positions) {
                 JsonObject seatObj = el.getAsJsonObject();
                 seats.add(new Seat(seatObj.get("row").getAsInt(), seatObj.get("column").getAsInt()));
             }
-            return new Reservation(clientId, concert, zone, seats);
+            return new Reservation(clientId, concertName, zoneName, seats);
         } else {
-            return new Reservation(clientId, concert, zone, quantity);
+            return new Reservation(clientId, concertName, zoneName, quantity);
         }
     }
 
@@ -193,7 +195,7 @@ public class JsonService {
         for (Reservation r : c.getReservations()) {
             JsonObject rObj = new JsonObject();
             rObj.addProperty("clientId", r.getClientId());
-            rObj.addProperty("zoneName", r.getReservedZone().getName());
+            rObj.addProperty("zoneName", r.getZoneName()); // antes: r.getReservedZone().getName()
             rObj.addProperty("quantityReserved", r.getQuantityReserved());
 
             if (r.getSeats() != null && !r.getSeats().isEmpty()) {
