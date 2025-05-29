@@ -37,23 +37,36 @@ public class ServerThread extends Thread {
     }
 
     private void attend() throws Exception {
-        Object request = connection.receiveObject();
-        if (request instanceof String action) {
-            switch (action) {
-                case "GET_CONCERTS" -> {
-                    List<Concert> concerts = concertManager.getAllConcerts();
-                    List<ConcertDTO> concertDTOs = concertManager.toDTO(concerts);
-                    connection.sendObject(concertDTOs);
-                }
-                case "CREATE_RESERVATION" -> {
-                    ReservationDTO reservationDTO = (ReservationDTO) connection.receiveObject();
-                    Reservation reservation = Reservation.fromDTO(reservationDTO);
-                    //   boolean success = concertManager.addReservation(reservation);
-                    //  connection.sendObject(success);
-                }
-                case "EDIT_CONCERT" -> {
-                    ConcertDTO updatedConcert = (ConcertDTO) connection.receiveObject();
-                    concertManager.updateConcert(Concert.fromDTO(updatedConcert));
+        while (true) {
+            Object request = connection.receiveObject();
+            if (request == null) {
+                break;
+            }
+            if (request instanceof String action) {
+                switch (action) {
+                    case "GET_CONCERTS" -> {
+                        List<Concert> concerts = concertManager.getAllConcerts();
+                        List<ConcertDTO> concertDTOs = concertManager.toDTO(concerts);
+                        connection.sendObject(concertDTOs);
+                    }
+                    case "CREATE_RESERVATION" -> {
+                        ReservationDTO reservationDTO = (ReservationDTO) connection.receiveObject();
+                        Reservation reservation = Reservation.fromDTO(reservationDTO);
+                        // boolean success = concertManager.addReservation(reservation);
+                        // connection.sendObject(success);
+                    }
+                    case "EDIT_CONCERT" -> {
+                        ConcertDTO updatedConcert = (ConcertDTO) connection.receiveObject();
+                        concertManager.updateConcert(Concert.fromDTO(updatedConcert));
+                    }
+                    case "ADD_CONCERT" -> {
+                        ConcertDTO newConcert = (ConcertDTO) connection.receiveObject();
+                        concertManager.createConcert(Concert.fromDTO(newConcert));
+                    }
+                    case "DELETE_CONCERT" -> {
+                        String concertName = (String) connection.receiveObject();
+                        concertManager.removeConcert(concertName);
+                    }
                 }
             }
         }
