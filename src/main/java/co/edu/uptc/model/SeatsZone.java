@@ -94,9 +94,9 @@ public class SeatsZone extends Zone {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
                 seatDTOs[i][j] = seats[i][j].toDTO();
+                seatDTOs[i][j].setReserved(seats[i][j].isReserved());
             }
         }
-
         return new SeatsZoneDTO(
             name,
             description,
@@ -109,7 +109,7 @@ public class SeatsZone extends Zone {
         );
     }
 
-    public static SeatsZone fromDTO(SeatsZoneDTO dto) {
+    public static SeatsZone fromSeatZoneDTO(SeatsZoneDTO dto) {
         SeatsZone zone = new SeatsZone(
             dto.getName(),
             dto.getPrice(),
@@ -118,8 +118,13 @@ public class SeatsZone extends Zone {
             dto.getRows(),
             dto.getColumns()
         );
-
         SeatDTO[][] dtoSeats = dto.getSeats();
+        dtoSeats = new SeatDTO[dto.getRows()][dto.getColumns()];
+        for (int i = 0; i < dto.getRows(); i++) {
+            for (int j = 0; j < dto.getColumns(); j++) {
+                dtoSeats[i][j] = new SeatDTO(i, j); 
+            }
+        }
         Seat[][] seats = new Seat[dto.getRows()][dto.getColumns()];
         for (int i = 0; i < dto.getRows(); i++) {
             for (int j = 0; j < dto.getColumns(); j++) {

@@ -1,5 +1,7 @@
 package co.edu.uptc.model;
 
+import co.edu.uptc.dtos.GeneralZoneDTO;
+import co.edu.uptc.dtos.SeatsZoneDTO;
 import co.edu.uptc.dtos.ZoneDTO;
 
 public abstract class Zone {
@@ -25,11 +27,12 @@ public abstract class Zone {
     public abstract ZoneDTO toDTO();
 
     public static Zone fromDTO(ZoneDTO dto) {
-        if (dto.hasSeats()) {
-            return SeatsZone.fromDTO(dto);
-        } else {
-            return GeneralZone.fromDTO(dto);
+        if (dto instanceof SeatsZoneDTO seatsZone) {
+            return SeatsZone.fromSeatZoneDTO(seatsZone);
+        } else if (dto instanceof GeneralZoneDTO generalZone) {
+            return GeneralZone.fromGeneralZoneDTO(generalZone);
         }
+        return null;
     }
 
     public String getName() {

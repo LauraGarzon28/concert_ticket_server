@@ -28,7 +28,7 @@ public class ConcertController {
         GeneralZone generalZone = new GeneralZone("General", 50.0, "Zona general sin asientos", false, 100);
         SeatsZone seatsZone = new SeatsZone("VIP", 150.0, "Zona con asientos asignados", true, 5, 5);
 
-        Concert concert = new Concert("Legend 1997", new ArrayList<String>(), LocalDateTime.now(), "Cuba", "Una descripción", null);
+        Concert concert = new Concert("Legend 1997", new ArrayList<>(), LocalDateTime.now(), "Cuba", "Una descripción", null);
 
         concert.addZone(generalZone);
         concert.addZone(seatsZone);
@@ -40,9 +40,9 @@ public class ConcertController {
         System.out.println("Concierto encontrado: " + (foundConcert != null));
 
         Reservation generalReservation = new Reservation(
-                1, // clientId
-                concert.getName(), // concierto
-                generalZone.getName(), // zona
+                1,
+                concert.getName(), 
+                generalZone.getName(),
                 5);
         System.out.println("Reservar en zona general: " + concertManager.addGeneralReservation(generalReservation));
 
@@ -73,6 +73,8 @@ public class ConcertController {
 
         concertManager.removeConcert("Legend 1997");
         System.out.println("Concierto eliminado: " + (concertManager.searchConcert("Legend 1997") == null));
+
+        concertManager.getAllConcerts();
 
         try {
             serverSocket = new ServerSocket(port);

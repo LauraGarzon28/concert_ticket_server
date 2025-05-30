@@ -53,16 +53,16 @@ public class ConcertManager {
         return concerts.in_order();
     }
 
-    public synchronized boolean updateConcert(Concert concert) {
+    public synchronized boolean updateConcert(String oldName, Concert concert) {
         if (concert == null || concert.getName() == null || concert.getName().trim().isEmpty()) {
             return false;
         }
 
-        Concert newConcert = new Concert();
-        newConcert.setName(concert.getName());
+        Concert oldConcert = new Concert();
+        oldConcert.setName(oldName);
 
-        if (concerts.exist(newConcert) != null) {
-            concerts.delete(newConcert);
+        if (concerts.exist(oldConcert) != null) {
+            concerts.delete(oldConcert);
             concerts.add(concert);
 
             jsonService.writeConcertsToFile(filePath, getAllConcerts());
@@ -189,7 +189,7 @@ public class ConcertManager {
         return dtoList;
     }
 
-    private ConcertDTO convertConcertToDTO(Concert concert) {
+    public ConcertDTO convertConcertToDTO(Concert concert) {
         List<ZoneDTO> zoneDTOs = convertZonesToDTOs(concert.getZones());
         List<ReservationDTO> reservationDTOs = convertReservationsToDTOs(concert.getReservations());
 
@@ -206,12 +206,16 @@ public class ConcertManager {
     private List<ZoneDTO> convertZonesToDTOs(List<Zone> zones) {
         List<ZoneDTO> dtoList = new ArrayList<>();
         for (Zone zone : zones) {
-            dtoList.add(zone.toDTO());
+            if (zone instanceof GeneralZone generalZone) {
+                dtoList.add(generalZone.toDTO());
+            } else if (zone instanceof SeatsZone seatsZone) {
+                dtoList.add(seatsZone.toDTO());
+            } 
         }
         return dtoList;
     }
 
-    private List<ReservationDTO> convertReservationsToDTOs(List<Reservation> reservations) {
+    public List<ReservationDTO> convertReservationsToDTOs(List<Reservation> reservations) {
         List<ReservationDTO> dtoList = new ArrayList<>();
         for (Reservation res : reservations) {
             dtoList.add(convertReservationToDTO(res));

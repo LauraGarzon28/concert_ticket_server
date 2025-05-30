@@ -5,6 +5,7 @@ import java.net.Socket;
 import java.util.List;
 
 import co.edu.uptc.connection.Connection;
+import co.edu.uptc.dtos.Command;
 import co.edu.uptc.dtos.ConcertDTO;
 import co.edu.uptc.dtos.ReservationDTO;
 import co.edu.uptc.model.Concert;
@@ -42,30 +43,49 @@ public class ServerThread extends Thread {
             if (request == null) {
                 break;
             }
-            if (request instanceof String action) {
-                switch (action) {
+            if (request instanceof Command command) {
+                switch (command.getCommand()) {
                     case "GET_CONCERTS" -> {
                         List<Concert> concerts = concertManager.getAllConcerts();
                         List<ConcertDTO> concertDTOs = concertManager.toDTO(concerts);
                         connection.sendObject(concertDTOs);
                     }
-                    case "CREATE_RESERVATION" -> {
-                        ReservationDTO reservationDTO = (ReservationDTO) connection.receiveObject();
-                        Reservation reservation = Reservation.fromDTO(reservationDTO);
-                        // boolean success = concertManager.addReservation(reservation);
-                        // connection.sendObject(success);
-                    }
                     case "EDIT_CONCERT" -> {
-                        ConcertDTO updatedConcert = (ConcertDTO) connection.receiveObject();
-                        concertManager.updateConcert(Concert.fromDTO(updatedConcert));
+                        List<Object> data = (List<Object>) command.getObject();
+                        String oldConcert = (String) data.get(0);
+                        ConcertDTO updatedConcert = (ConcertDTO) data.get(1);
+                        concertManager.updateConcert(oldConcert, Concert.fromDTO(updatedConcert));
                     }
                     case "ADD_CONCERT" -> {
-                        ConcertDTO newConcert = (ConcertDTO) connection.receiveObject();
+                        ConcertDTO newConcert = (ConcertDTO) command.getObject();
                         concertManager.createConcert(Concert.fromDTO(newConcert));
                     }
                     case "DELETE_CONCERT" -> {
-                        String concertName = (String) connection.receiveObject();
+                        String concertName = (String) command.getObject();
                         concertManager.removeConcert(concertName);
+                    }
+                    case "CREATE_GENERAL_RESERVATION" -> {
+                        ReservationDTO reservationDTO = (ReservationDTO) command.getObject();
+                        Reservation reservation = Reservation.fromDTO(reservationDTO);
+                        concertManager.addGeneralReservation(reservation);
+                    }
+                    case "REMOVE_RESERVATION" -> {
+                        ReservationDTO reservationDTO = (ReservationDTO) command.getObject();
+                        Reservation reservation = Reservation.fromDTO(reservationDTO);
+                        // boolean success = concertManager.removeReservation(reservation);
+                        // connection.sendObject(success);
+                    }
+                    case "GET_RESERVATIONS_BY_CLIENT_ID" -> {
+                        int clientId = (int) command.getObject();
+                        List<Reservation> reservations = concertManager.getReservationsByClientId(clientId);
+                        List<ReservationDTO> reservationDTOs = concertManager.convertReservationsToDTOs(reservations);
+                        connection.sendObject(reservationDTOs);
+                    }
+                    case "GET_CONCERT_BY_NAME" -> {
+                        String concertName = (String) command.getObject();
+                        Concert concert = concertManager.searchConcert(concertName);
+                        ConcertDTO concertDTOSend = concertManager.convertConcertToDTO(concert);
+                        connection.sendObject(concertDTOSend);
                     }
                 }
             }

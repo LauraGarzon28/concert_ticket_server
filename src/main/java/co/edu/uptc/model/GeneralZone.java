@@ -41,7 +41,7 @@ public class GeneralZone extends Zone {
                 this.quantityReserved);
     }
 
-    public static GeneralZone fromDTO(GeneralZoneDTO dto) {
+    public static GeneralZone fromGeneralZoneDTO(GeneralZoneDTO dto) {
         GeneralZone zone = new GeneralZone(
                 dto.getName(),
                 dto.getPrice(),
