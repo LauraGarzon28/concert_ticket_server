@@ -1,6 +1,7 @@
 package co.edu.uptc.model;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 import co.edu.uptc.dtos.SeatDTO;
 
@@ -44,13 +45,29 @@ public class Seat implements Serializable {
     public void setColumn(int column) {
         this.column = column;
     }
-    
+
     public SeatDTO toDTO() {
         return new SeatDTO(row, column);
     }
 
     public static Seat fromDTO(SeatDTO dto) {
         return new Seat(dto.getRow(), dto.getColumn());
-    }    
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Seat seat = (Seat) o;
+        return row == seat.row && column == seat.column;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(row, column);
+    }
 
 }

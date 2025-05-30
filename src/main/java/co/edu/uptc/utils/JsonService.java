@@ -50,7 +50,7 @@ public class JsonService {
 
         JsonArray reservationsArray = obj.getAsJsonArray("reservations");
         for (JsonElement res : reservationsArray) {
-            Reservation reservation = parseReservation(res.getAsJsonObject(), zones, name); // Usamos name
+            Reservation reservation = parseReservation(res.getAsJsonObject(), zones, name); 
 
             if (reservation.getZoneName() != null) {
                 Zone zone = zones.stream().filter(z -> z.getName().equals(reservation.getZoneName())).findFirst()
@@ -195,7 +195,7 @@ public class JsonService {
         for (Reservation r : c.getReservations()) {
             JsonObject rObj = new JsonObject();
             rObj.addProperty("clientId", r.getClientId());
-            rObj.addProperty("zoneName", r.getZoneName()); // antes: r.getReservedZone().getName()
+            rObj.addProperty("zoneName", r.getZoneName());
             rObj.addProperty("quantityReserved", r.getQuantityReserved());
 
             if (r.getSeats() != null && !r.getSeats().isEmpty()) {

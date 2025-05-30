@@ -159,15 +159,12 @@ public class ConcertManager {
     public boolean removeReservation(Reservation reservation) {
         if (reservation == null)
             return false;
-
         Concert concert = new Concert();
         concert.setName(reservation.getConcertName());
         concert = concerts.search(concert);
         if (concert == null)
             return false;
-
         Zone zone = findZoneByName(concert, reservation.getZoneName());
-
         if (zone instanceof GeneralZone generalZone) {
             generalZone.unreserve(reservation.getQuantityReserved());
         } else if (zone instanceof SeatsZone seatsZone) {
@@ -175,7 +172,6 @@ public class ConcertManager {
                 seatsZone.unreserveSeat(seat.getRow(), seat.getColumn());
             }
         }
-
         concert.getReservations().remove(reservation);
         jsonService.writeConcertsToFile(filePath, getAllConcerts());
         return true;
@@ -210,7 +206,7 @@ public class ConcertManager {
                 dtoList.add(generalZone.toDTO());
             } else if (zone instanceof SeatsZone seatsZone) {
                 dtoList.add(seatsZone.toDTO());
-            } 
+            }
         }
         return dtoList;
     }

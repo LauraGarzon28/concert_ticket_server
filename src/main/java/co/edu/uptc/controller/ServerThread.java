@@ -69,17 +69,10 @@ public class ServerThread extends Thread {
                         Reservation reservation = Reservation.fromDTO(reservationDTO);
                         concertManager.addGeneralReservation(reservation);
                     }
-                    case "REMOVE_RESERVATION" -> {
+                    case "CREATE_SEATS_RESERVATION" -> {
                         ReservationDTO reservationDTO = (ReservationDTO) command.getObject();
                         Reservation reservation = Reservation.fromDTO(reservationDTO);
-                        // boolean success = concertManager.removeReservation(reservation);
-                        // connection.sendObject(success);
-                    }
-                    case "GET_RESERVATIONS_BY_CLIENT_ID" -> {
-                        int clientId = (int) command.getObject();
-                        List<Reservation> reservations = concertManager.getReservationsByClientId(clientId);
-                        List<ReservationDTO> reservationDTOs = concertManager.convertReservationsToDTOs(reservations);
-                        connection.sendObject(reservationDTOs);
+                        concertManager.addSeatReservation(reservation);
                     }
                     case "GET_CONCERT_BY_NAME" -> {
                         String concertName = (String) command.getObject();
@@ -87,6 +80,17 @@ public class ServerThread extends Thread {
                         ConcertDTO concertDTOSend = concertManager.convertConcertToDTO(concert);
                         connection.sendObject(concertDTOSend);
                     }
+                    case "GET_RESERVATIONS_BY_CLIENT_ID" -> {
+                        int clientId = (int) command.getObject();
+                        List<Reservation> reservations = concertManager.getReservationsByClientId(clientId);
+                        List<ReservationDTO> reservationDTOs = concertManager.convertReservationsToDTOs(reservations);
+                        connection.sendObject(reservationDTOs);
+                    }
+                    case "DELETE_RESERVATION" -> {
+                        ReservationDTO reservationDTO = (ReservationDTO) command.getObject();
+                        Reservation reservation = Reservation.fromDTO(reservationDTO);
+                        concertManager.removeReservation(reservation);
+                    }  
                 }
             }
         }

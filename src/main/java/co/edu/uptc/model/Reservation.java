@@ -2,6 +2,7 @@ package co.edu.uptc.model;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import co.edu.uptc.dtos.ReservationDTO;
 import co.edu.uptc.dtos.SeatDTO;
@@ -106,6 +107,26 @@ public class Reservation {
 
     public void setClientId(int clientId) {
         this.clientId = clientId;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(concertName, zoneName, quantityReserved, seats);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+
+        Reservation reservation = (Reservation) o;
+
+        return Objects.equals(concertName, reservation.concertName)
+                && Objects.equals(zoneName, reservation.zoneName)
+                && quantityReserved == reservation.quantityReserved
+                && Objects.equals(seats, reservation.seats);
     }
 
 }
