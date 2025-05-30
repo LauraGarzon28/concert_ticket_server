@@ -7,17 +7,19 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Properties;
 
+import co.edu.uptc.connection.ServerThread;
 import co.edu.uptc.model.ConcertManager;
 
 public class ConcertController {
 
     private ServerSocket serverSocket;
     private ConcertManager concertManager;
-
+    
     public ConcertController(int port) {
         concertManager = new ConcertManager();
         try {
             serverSocket = new ServerSocket(port);
+            System.out.println("Servidor iniciado en el puerto " + port);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -26,12 +28,13 @@ public class ConcertController {
     public void start() throws IOException {
         while (true) {
             Socket socket = serverSocket.accept();
+            System.out.println("Cliente Conectado: " + socket.getInetAddress());
             new ServerThread(socket, concertManager).start();
         }
     }
 
     public static int getPort() {
-        try (InputStream input = new FileInputStream("./data/config.properties")) {
+        try (InputStream input = new FileInputStream("./config.properties")) {
             Properties properties = new Properties();
             properties.load(input);
             return Integer.parseInt(properties.getProperty("port"));

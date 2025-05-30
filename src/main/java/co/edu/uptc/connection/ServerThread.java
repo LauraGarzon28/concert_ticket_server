@@ -1,10 +1,9 @@
-package co.edu.uptc.controller;
+package co.edu.uptc.connection;
 
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 
-import co.edu.uptc.connection.Connection;
 import co.edu.uptc.dtos.Command;
 import co.edu.uptc.dtos.ConcertDTO;
 import co.edu.uptc.dtos.ReservationDTO;
@@ -14,7 +13,7 @@ import co.edu.uptc.model.Reservation;
 
 public class ServerThread extends Thread {
 
-    private Connection connection;
+    private ClientConnection connection;
     private ConcertManager concertManager;
     private Socket socket;
 
@@ -22,7 +21,7 @@ public class ServerThread extends Thread {
         this.socket = socket;
         this.concertManager = concertManager;
         try {
-            this.connection = new Connection(socket);
+            this.connection = new ClientConnection(socket);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -34,7 +33,7 @@ public class ServerThread extends Thread {
             attend();
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        } 
     }
 
     private void attend() throws Exception {
@@ -68,31 +67,36 @@ public class ServerThread extends Thread {
         connection.sendObject(concertDTOs);
     }
 
-    private void handleEditConcert(Command command) {
+    private void handleEditConcert(Command command) throws IOException {
         List<Object> data = (List<Object>) command.getObject();
         String oldConcert = (String) data.get(0);
         ConcertDTO updatedConcert = (ConcertDTO) data.get(1);
-        concertManager.updateConcert(oldConcert, Concert.fromDTO(updatedConcert));
+        connection.sendObject(concertManager.updateConcert(oldConcert, Concert.fromDTO(updatedConcert)));
     }
 
-    private void handleAddConcert(Command command) {
+    private void handleAddConcert(Command command) throws IOException {
         ConcertDTO newConcert = (ConcertDTO) command.getObject();
-        concertManager.createConcert(Concert.fromDTO(newConcert));
+        connection.sendObject(concertManager.createConcert(Concert.fromDTO(newConcert)));
     }
 
-    private void handleDeleteConcert(Command command) {
+    private void handleDeleteConcert(Command command) throws IOException {
         String concertName = (String) command.getObject();
-        concertManager.removeConcert(concertName);
+        connection.sendObject(concertManager.removeConcert(concertName));
     }
 
-    private void handleGeneralReservation(Command command) {
+    private void handleGeneralReservation(Command command) throws IOException {
         Reservation reservation = Reservation.fromDTO((ReservationDTO) command.getObject());
-        concertManager.addGeneralReservation(reservation);
+        connection.sendObject(concertManager.addGeneralReservation(reservation));
     }
 
-    private void handleSeatReservation(Command command) {
+    private void handleSeatReservation(Command command) throws IOException {
         Reservation reservation = Reservation.fromDTO((ReservationDTO) command.getObject());
-        concertManager.addSeatReservation(reservation);
+        connection.sendObject(concertManager.addSeatReservation(reservation));
+    }
+
+    private void handleDeleteReservation(Command command) throws IOException {
+        Reservation reservation = Reservation.fromDTO((ReservationDTO) command.getObject());
+        connection.sendObject(concertManager.removeReservation(reservation));
     }
 
     private void handleGetConcertByName(Command command) throws IOException {
@@ -105,11 +109,6 @@ public class ServerThread extends Thread {
         List<ReservationDTO> reservationDTOs = concertManager
                 .convertReservationsToDTOs(concertManager.getReservationsByClientId(clientId));
         connection.sendObject(reservationDTOs);
-    }
-
-    private void handleDeleteReservation(Command command) {
-        Reservation reservation = Reservation.fromDTO((ReservationDTO) command.getObject());
-        concertManager.removeReservation(reservation);
     }
 
 }
