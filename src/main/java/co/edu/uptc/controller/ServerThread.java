@@ -40,60 +40,76 @@ public class ServerThread extends Thread {
     private void attend() throws Exception {
         while (true) {
             Object request = connection.receiveObject();
-            if (request == null) {
+            if (request == null)
                 break;
-            }
+
             if (request instanceof Command command) {
-                switch (command.getCommand()) {
-                    case "GET_CONCERTS" -> {
-                        List<Concert> concerts = concertManager.getAllConcerts();
-                        List<ConcertDTO> concertDTOs = concertManager.toDTO(concerts);
-                        connection.sendObject(concertDTOs);
-                    }
-                    case "EDIT_CONCERT" -> {
-                        List<Object> data = (List<Object>) command.getObject();
-                        String oldConcert = (String) data.get(0);
-                        ConcertDTO updatedConcert = (ConcertDTO) data.get(1);
-                        concertManager.updateConcert(oldConcert, Concert.fromDTO(updatedConcert));
-                    }
-                    case "ADD_CONCERT" -> {
-                        ConcertDTO newConcert = (ConcertDTO) command.getObject();
-                        concertManager.createConcert(Concert.fromDTO(newConcert));
-                    }
-                    case "DELETE_CONCERT" -> {
-                        String concertName = (String) command.getObject();
-                        concertManager.removeConcert(concertName);
-                    }
-                    case "CREATE_GENERAL_RESERVATION" -> {
-                        ReservationDTO reservationDTO = (ReservationDTO) command.getObject();
-                        Reservation reservation = Reservation.fromDTO(reservationDTO);
-                        concertManager.addGeneralReservation(reservation);
-                    }
-                    case "CREATE_SEATS_RESERVATION" -> {
-                        ReservationDTO reservationDTO = (ReservationDTO) command.getObject();
-                        Reservation reservation = Reservation.fromDTO(reservationDTO);
-                        concertManager.addSeatReservation(reservation);
-                    }
-                    case "GET_CONCERT_BY_NAME" -> {
-                        String concertName = (String) command.getObject();
-                        Concert concert = concertManager.searchConcert(concertName);
-                        ConcertDTO concertDTOSend = concertManager.convertConcertToDTO(concert);
-                        connection.sendObject(concertDTOSend);
-                    }
-                    case "GET_RESERVATIONS_BY_CLIENT_ID" -> {
-                        int clientId = (int) command.getObject();
-                        List<Reservation> reservations = concertManager.getReservationsByClientId(clientId);
-                        List<ReservationDTO> reservationDTOs = concertManager.convertReservationsToDTOs(reservations);
-                        connection.sendObject(reservationDTOs);
-                    }
-                    case "DELETE_RESERVATION" -> {
-                        ReservationDTO reservationDTO = (ReservationDTO) command.getObject();
-                        Reservation reservation = Reservation.fromDTO(reservationDTO);
-                        concertManager.removeReservation(reservation);
-                    }  
-                }
+                handleCommand(command);
             }
         }
+    }
+
+    private void handleCommand(Command command) throws Exception {
+        switch (command.getCommand()) {
+            case "GET_CONCERTS" -> handleGetConcerts();
+            case "EDIT_CONCERT" -> handleEditConcert(command);
+            case "ADD_CONCERT" -> handleAddConcert(command);
+            case "DELETE_CONCERT" -> handleDeleteConcert(command);
+            case "CREATE_GENERAL_RESERVATION" -> handleGeneralReservation(command);
+            case "CREATE_SEATS_RESERVATION" -> handleSeatReservation(command);
+            case "GET_CONCERT_BY_NAME" -> handleGetConcertByName(command);
+            case "GET_RESERVATIONS_BY_CLIENT_ID" -> handleGetReservationsByClient(command);
+            case "DELETE_RESERVATION" -> handleDeleteReservation(command);
+        }
+    }
+
+    private void handleGetConcerts() throws IOException {
+        List<ConcertDTO> concertDTOs = concertManager.toDTO(concertManager.getAllConcerts());
+        connection.sendObject(concertDTOs);
+    }
+
+    private void handleEditConcert(Command command) {
+        List<Object> data = (List<Object>) command.getObject();
+        String oldConcert = (String) data.get(0);
+        ConcertDTO updatedConcert = (ConcertDTO) data.get(1);
+        concertManager.updateConcert(oldConcert, Concert.fromDTO(updatedConcert));
+    }
+
+    private void handleAddConcert(Command command) {
+        ConcertDTO newConcert = (ConcertDTO) command.getObject();
+        concertManager.createConcert(Concert.fromDTO(newConcert));
+    }
+
+    private void handleDeleteConcert(Command command) {
+        String concertName = (String) command.getObject();
+        concertManager.removeConcert(concertName);
+    }
+
+    private void handleGeneralReservation(Command command) {
+        Reservation reservation = Reservation.fromDTO((ReservationDTO) command.getObject());
+        concertManager.addGeneralReservation(reservation);
+    }
+
+    private void handleSeatReservation(Command command) {
+        Reservation reservation = Reservation.fromDTO((ReservationDTO) command.getObject());
+        concertManager.addSeatReservation(reservation);
+    }
+
+    private void handleGetConcertByName(Command command) throws IOException {
+        Concert concert = concertManager.searchConcert((String) command.getObject());
+        connection.sendObject(concertManager.convertConcertToDTO(concert));
+    }
+
+    private void handleGetReservationsByClient(Command command) throws IOException {
+        int clientId = (int) command.getObject();
+        List<ReservationDTO> reservationDTOs = concertManager
+                .convertReservationsToDTOs(concertManager.getReservationsByClientId(clientId));
+        connection.sendObject(reservationDTOs);
+    }
+
+    private void handleDeleteReservation(Command command) {
+        Reservation reservation = Reservation.fromDTO((ReservationDTO) command.getObject());
+        concertManager.removeReservation(reservation);
     }
 
 }
